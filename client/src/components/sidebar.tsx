@@ -65,7 +65,7 @@ export function Sidebar({ selectedCollectionId, onSelectCollection, isOpen, onTo
         {/* Header */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-semibold text-gray-900">PromptCraft</h1>
+            <h1 className="text-xl font-semibold text-gray-900">PromptVest</h1>
             <Button
               variant="ghost"
               size="sm"

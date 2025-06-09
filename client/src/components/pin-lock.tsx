@@ -82,7 +82,7 @@ export function PinLock({ onUnlock }: PinLockProps) {
             Secure Access
           </h1>
           <p className="text-gray-600">
-            Enter your PIN to access PromptCraft
+            Enter your PIN to access PromptVest
           </p>
         </div>
 

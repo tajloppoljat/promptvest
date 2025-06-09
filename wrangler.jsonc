@@ -1,0 +1,11 @@
+{
+  "name": "promptvest",
+  "compatibility_date": "2025-06-09",
+  "main": "dist/index.js",
+  "assets": {
+    "directory": "./dist/public"
+  },
+  "env": {
+    "NODE_ENV": "production"
+  }
+} 

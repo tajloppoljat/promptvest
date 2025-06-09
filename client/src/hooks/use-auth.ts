@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const AUTH_KEY = "promptcraft_authenticated";
+const AUTH_KEY = "promptvest_authenticated";
 const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
 export function useAuth() {

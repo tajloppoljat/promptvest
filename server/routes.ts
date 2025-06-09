@@ -119,12 +119,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/prompts/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      console.log(`Attempting to delete prompt with ID: ${id}`);
       const deleted = await storage.deletePrompt(id);
+      console.log(`Delete result: ${deleted}`);
       if (!deleted) {
         return res.status(404).json({ message: "Prompt not found" });
       }
       res.status(204).send();
     } catch (error) {
+      console.error("Error deleting prompt:", error);
       res.status(500).json({ message: "Failed to delete prompt" });
     }
   });

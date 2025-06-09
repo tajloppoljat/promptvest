@@ -120,7 +120,7 @@ export default function Home() {
         </div>
 
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6 bg-gradient-to-br from-gray-50 to-white">
           <div className="max-w-4xl mx-auto">
             {!selectedCollectionId ? (
               // No collection selected
@@ -129,7 +129,7 @@ export default function Home() {
                   <MessageSquare className="mx-auto h-16 w-16" />
                 </div>
                 <h3 className="text-xl font-medium text-gray-900 mb-2">
-                  Welcome to PromptCraft
+                  Welcome to PromptVest
                 </h3>
                 <p className="text-gray-500 mb-6">
                   Select a collection from the sidebar to view and manage your prompts

@@ -91,7 +91,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deletePrompt(id: number): Promise<boolean> {
+    console.log(`Storage: Deleting prompt with ID: ${id}`);
     const result = await db.delete(prompts).where(eq(prompts.id, id));
+    console.log(`Storage: Delete result rowCount: ${result.rowCount}`);
     return result.rowCount > 0;
   }
 
