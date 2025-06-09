@@ -1,4 +1,6 @@
 import { collections, prompts, type Collection, type InsertCollection, type Prompt, type InsertPrompt } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // Collections
@@ -17,104 +19,97 @@ export interface IStorage {
   reorderPrompts(collectionId: number, promptIds: number[]): Promise<boolean>;
 }
 
-export class MemStorage implements IStorage {
-  private collections: Map<number, Collection>;
-  private prompts: Map<number, Prompt>;
-  private collectionIdCounter: number;
-  private promptIdCounter: number;
-
-  constructor() {
-    this.collections = new Map();
-    this.prompts = new Map();
-    this.collectionIdCounter = 1;
-    this.promptIdCounter = 1;
-  }
-
-  // Collections
+export class DatabaseStorage implements IStorage {
   async getCollections(): Promise<Collection[]> {
-    return Array.from(this.collections.values());
+    return await db.select().from(collections);
   }
 
   async getCollection(id: number): Promise<Collection | undefined> {
-    return this.collections.get(id);
+    const [collection] = await db.select().from(collections).where(eq(collections.id, id));
+    return collection || undefined;
   }
 
   async createCollection(insertCollection: InsertCollection): Promise<Collection> {
-    const id = this.collectionIdCounter++;
-    const collection: Collection = { ...insertCollection, id };
-    this.collections.set(id, collection);
+    const [collection] = await db
+      .insert(collections)
+      .values(insertCollection)
+      .returning();
     return collection;
   }
 
   async updateCollection(id: number, updates: Partial<InsertCollection>): Promise<Collection | undefined> {
-    const existing = this.collections.get(id);
-    if (!existing) return undefined;
-    
-    const updated: Collection = { ...existing, ...updates };
-    this.collections.set(id, updated);
-    return updated;
+    const [collection] = await db
+      .update(collections)
+      .set(updates)
+      .where(eq(collections.id, id))
+      .returning();
+    return collection || undefined;
   }
 
   async deleteCollection(id: number): Promise<boolean> {
-    // Also delete all prompts in this collection
-    const promptsToDelete = Array.from(this.prompts.values())
-      .filter(prompt => prompt.collectionId === id);
+    // Delete all prompts in this collection first
+    await db.delete(prompts).where(eq(prompts.collectionId, id));
     
-    promptsToDelete.forEach(prompt => this.prompts.delete(prompt.id));
-    return this.collections.delete(id);
+    const result = await db.delete(collections).where(eq(collections.id, id));
+    return result.rowCount > 0;
   }
 
-  // Prompts
   async getPromptsByCollection(collectionId: number): Promise<Prompt[]> {
-    return Array.from(this.prompts.values())
-      .filter(prompt => prompt.collectionId === collectionId)
-      .sort((a, b) => a.order - b.order);
+    return await db
+      .select()
+      .from(prompts)
+      .where(eq(prompts.collectionId, collectionId))
+      .orderBy(prompts.order);
   }
 
   async getPrompt(id: number): Promise<Prompt | undefined> {
-    return this.prompts.get(id);
+    const [prompt] = await db.select().from(prompts).where(eq(prompts.id, id));
+    return prompt || undefined;
   }
 
   async createPrompt(insertPrompt: InsertPrompt): Promise<Prompt> {
-    const id = this.promptIdCounter++;
     // If no order specified, put at the end
     if (insertPrompt.order === 0) {
       const existingPrompts = await this.getPromptsByCollection(insertPrompt.collectionId);
       insertPrompt.order = existingPrompts.length;
     }
     
-    const prompt: Prompt = { ...insertPrompt, id };
-    this.prompts.set(id, prompt);
+    const [prompt] = await db
+      .insert(prompts)
+      .values(insertPrompt)
+      .returning();
     return prompt;
   }
 
   async updatePrompt(id: number, updates: Partial<InsertPrompt>): Promise<Prompt | undefined> {
-    const existing = this.prompts.get(id);
-    if (!existing) return undefined;
-    
-    const updated: Prompt = { ...existing, ...updates };
-    this.prompts.set(id, updated);
-    return updated;
+    const [prompt] = await db
+      .update(prompts)
+      .set(updates)
+      .where(eq(prompts.id, id))
+      .returning();
+    return prompt || undefined;
   }
 
   async deletePrompt(id: number): Promise<boolean> {
-    return this.prompts.delete(id);
+    const result = await db.delete(prompts).where(eq(prompts.id, id));
+    return result.rowCount > 0;
   }
 
   async reorderPrompts(collectionId: number, promptIds: number[]): Promise<boolean> {
-    const prompts = await this.getPromptsByCollection(collectionId);
-    const promptMap = new Map(prompts.map(p => [p.id, p]));
-    
-    promptIds.forEach((promptId, index) => {
-      const prompt = promptMap.get(promptId);
-      if (prompt) {
-        prompt.order = index;
-        this.prompts.set(promptId, prompt);
+    try {
+      // Update each prompt's order
+      for (let i = 0; i < promptIds.length; i++) {
+        await db
+          .update(prompts)
+          .set({ order: i })
+          .where(eq(prompts.id, promptIds[i]));
       }
-    });
-    
-    return true;
+      return true;
+    } catch (error) {
+      console.error("Error reordering prompts:", error);
+      return false;
+    }
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
