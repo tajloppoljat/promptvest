@@ -60,7 +60,7 @@ export function Sidebar({ selectedCollectionId, onSelectCollection, isOpen, onTo
 
   return (
     <>
-      <div className={`w-80 bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out ${
+      <div className={`w-80 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 ease-in-out ${
         isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       } fixed lg:relative z-40 h-full`}>
         {/* Header */}
