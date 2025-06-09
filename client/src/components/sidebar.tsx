@@ -7,6 +7,7 @@ import { useCollections, useDeleteCollection } from "@/hooks/use-collections";
 import { usePrompts } from "@/hooks/use-prompts";
 import { CreateCollectionModal } from "./create-collection-modal";
 import { EditCollectionModal } from "./edit-collection-modal";
+import { ThemeToggle } from "./theme-toggle";
 import { useToast } from "@/hooks/use-toast";
 import type { Collection } from "@shared/schema";
 
@@ -63,17 +64,20 @@ export function Sidebar({ selectedCollectionId, onSelectCollection, isOpen, onTo
         isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       } fixed lg:relative z-40 h-full`}>
         {/* Header */}
-        <div className="p-4 border-b border-gray-200">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-semibold text-gray-900">PromptCraft</h1>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onToggle}
-              className="lg:hidden"
-            >
-              <Menu className="h-4 w-4" />
-            </Button>
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">PromptCraft</h1>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onToggle}
+                className="lg:hidden"
+              >
+                <Menu className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           <Button 
             onClick={() => setShowCreateModal(true)}
